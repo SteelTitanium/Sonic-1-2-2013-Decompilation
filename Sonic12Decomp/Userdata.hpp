@@ -1,3 +1,5 @@
+#include "RetroEngine.hpp"
+
 #ifndef USERDATA_H
 #define USERDATA_H
 
@@ -85,16 +87,21 @@ inline void AddNativeFunction(const char *name, int (*funcPtr)(int, void *))
 
 inline bool ReadSaveRAMData()
 {
-    char buffer[0x100];
+    char sram_path[0x100];
 #if RETRO_PLATFORM == RETRO_OSX
     if (!usingCWD)
-        sprintf(buffer, "%s/SData.bin", getResourcesPath());
+        sprintf(sram_path, "%s/SData.bin", getResourcesPath());
     else
-        sprintf(buffer, "%sSData.bin", gamePath);
+        sprintf(sram_path, "%sSData.bin", gamePath);
+#elif RETRO_PLATFORM == RETRO_LINUX
+     if (!usingCWD)
+        sprintf(sram_path, "%s/SData.bin", SDL_GetPrefPath("Sonic 1_2", PREF_PATH));
+    else
+        sprintf(sram_path, "%sSData.bin", gamePath);
 #else
-    sprintf(buffer, "%sSData.bin", gamePath);
+    sprintf(sram_path, "%sSData.bin", gamePath);
 #endif
-    FileIO *saveFile = fOpen(buffer, "rb");
+    FileIO *saveFile = fOpen(sram_path, "rb");
     if (!saveFile)
         return false;
     fRead(saveRAM, 4u, SAVEDATA_MAX, saveFile);
@@ -104,17 +111,21 @@ inline bool ReadSaveRAMData()
 
 inline bool WriteSaveRAMData()
 {
-    char buffer[0x100];
+    char sram_path[0x100];
 #if RETRO_PLATFORM == RETRO_OSX
     if (!usingCWD)
-        sprintf(buffer, "%s/SData.bin", getResourcesPath());
+        sprintf(sram_path, "%s/SData.bin", getResourcesPath());
     else
-        sprintf(buffer, "%sSData.bin", gamePath);
+        sprintf(sram_path, "%sSData.bin", gamePath);
+#elif RETRO_PLATFORM == RETRO_LINUX
+     if (!usingCWD)
+        sprintf(sram_path, "%s/SData.bin", SDL_GetPrefPath("Sonic 1_2", PREF_PATH));
+    else
+        sprintf(sram_path, "%s/SData.bin", gamePath);
 #else
-    sprintf(buffer, "%sSData.bin", gamePath);
+    sprintf(sram_path, "%sSData.bin", gamePath);
 #endif
-
-    FileIO *saveFile = fOpen(buffer, "wb");
+    FileIO *saveFile = fOpen(sram_path, "wb");
     if (!saveFile)
         return false;
     fWrite(saveRAM, 4u, SAVEDATA_MAX, saveFile);

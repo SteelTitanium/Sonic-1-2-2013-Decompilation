@@ -34,6 +34,7 @@ typedef unsigned int uint;
 #define RETRO_WP7      (6)
 // Custom Platforms start here
 #define RETRO_VITA (7)
+#define RETRO_LINUX    (8)
 
 // Platform types (Game manages platform-specific code such as HUD position using this rather than the above)
 #define RETRO_STANDARD (0)
@@ -41,6 +42,9 @@ typedef unsigned int uint;
 
 #if defined _WIN32
 #define RETRO_PLATFORM (RETRO_WIN)
+#define RETRO_PLATTYPE (RETRO_STANDARD)
+#elif defined __linux__
+#define RETRO_PLATFORM (RETRO_LINUX)
 #define RETRO_PLATTYPE (RETRO_STANDARD)
 #elif defined __APPLE__
 #if __IPHONEOS__
@@ -74,7 +78,7 @@ typedef unsigned int uint;
 #define BASE_PATH            ""
 #endif
 
-#if RETRO_PLATFORM == RETRO_WINDOWS || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_VITA
+#if RETRO_PLATFORM == RETRO_WINDOWS || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_VITA || RETRO_PLATFORM == RETRO_LINUX
 #define RETRO_USING_SDL (1)
 #else // Since its an else & not an elif these platforms probably aren't supported yet
 #define RETRO_USING_SDL (0)
@@ -152,6 +156,14 @@ enum RetroGameType {
 
 extern bool usingCWD;
 extern bool engineDebugMode;
+
+#if defined (RETRO_GAME_SONIC)
+#if RETRO_GAME_SONIC == 1
+#define PREF_PATH "Sonic 1"
+#elif RETRO_GAME_SONIC == 2 
+#define PREF_PATH "Sonic 2"
+#endif
+#endif
 
 // Utils
 #include "Ini.hpp"

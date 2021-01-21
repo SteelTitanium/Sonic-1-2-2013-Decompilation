@@ -1,4 +1,5 @@
 #include "RetroEngine.hpp"
+#include "Userdata.hpp"
 
 int globalVariablesCount;
 int globalVariables[GLOBALVAR_COUNT];
@@ -8,6 +9,8 @@ int (*nativeFunction[16])(int, void *);
 int nativeFunctionCount = 0;
 
 char gamePath[0x100];
+static char settings_path[0x100];
+static char udata_path[0x100];
 int saveRAM[SAVEDATA_MAX];
 Achievement achievements[ACHIEVEMENT_MAX];
 LeaderboardEntry leaderboard[LEADERBOARD_MAX];
@@ -26,16 +29,20 @@ void InitUserdata()
     // userdata files are loaded from this directory
     sprintf(gamePath, "%s", BASE_PATH);
 
-    char buffer[0x100];
 #if RETRO_PLATFORM == RETRO_OSX
     if (!usingCWD)
-        sprintf(buffer, "%s/settings.ini", getResourcesPath());
+        sprintf(settings_path, "%s/settings.ini", getResourcesPath());
     else
-        sprintf(buffer, "%ssettings.ini", gamePath);
+        sprintf(settings_path, "%ssettings.ini", gamePath);
+#elif RETRO_PLATFORM == RETRO_LINUX
+     if (!usingCWD)
+        sprintf(settings_path, "%s/settings.ini", SDL_GetPrefPath("Sonic 1_2", PREF_PATH));
+    else
+        sprintf(settings_path, "%ssettings.ini", gamePath);
 #else
-    sprintf(buffer, BASE_PATH "settings.ini");
+    sprintf(settings_path, BASE_PATH "settings.ini");
 #endif
-    FileIO *file = fOpen(buffer, "rb");
+    FileIO *file = fOpen(settings_path, "rb");
     if (!file) {
         IniParser ini;
 
@@ -81,11 +88,11 @@ void InitUserdata()
         StrCopy(Engine.dataFile, "Data.rsdk");
         ini.SetString("Dev", "DataFile", Engine.dataFile);
 
-        ini.Write(BASE_PATH "settings.ini");
+        ini.Write(settings_path);
     }
     else {
         fClose(file);
-        IniParser ini(BASE_PATH "settings.ini");
+        IniParser ini(settings_path);
 
         if (!ini.GetBool("Dev", "DevMenu", &Engine.devMenu))
             Engine.devMenu = false;
@@ -180,13 +187,18 @@ void InitUserdata()
 
 #if RETRO_PLATFORM == RETRO_OSX
     if (!usingCWD)
-        sprintf(buffer, "%s/UData.bin", getResourcesPath());
+        sprintf(udata_path, "%s/UData.bin", getResourcesPath());
     else
-        sprintf(buffer, "%sUData.bin", gamePath);
+        sprintf(udata_path, "%sUData.bin", gamePath);
+#elif RETRO_PLATFORM == RETRO_LINUX
+     if (!usingCWD)
+        sprintf(udata_path, "%s/UData.bin", SDL_GetPrefPath("Sonic 1_2", PREF_PATH));
+    else
+        sprintf(udata_path, "%s/UData.bin", gamePath);
 #else
-    sprintf(buffer, "%sUData.bin", gamePath);
+    sprintf(udata_path, "%sUData.bin", gamePath);
 #endif
-    file = fOpen(buffer, "rb");
+    file = fOpen(udata_path, "rb");
     if (file) {
         fClose(file);
         ReadUserdata();
@@ -285,6 +297,11 @@ void ReadUserdata()
         sprintf(buffer, "%s/UData.bin", getResourcesPath());
     else
         sprintf(buffer, "%sUData.bin", gamePath);
+#elif RETRO_PLATFORM == RETRO_LINUX
+     if (!usingCWD)
+        sprintf(buffer, "%s/UData.bin", SDL_GetPrefPath("Sonic 1_2", PREF_PATH));
+    else
+        sprintf(buffer, "%s/UData.bin", gamePath);
 #else
     sprintf(buffer, "%sUData.bin", gamePath);
 #endif
@@ -317,6 +334,11 @@ void WriteUserdata()
         sprintf(buffer, "%s/UData.bin", getResourcesPath());
     else
         sprintf(buffer, "%sUData.bin", gamePath);
+#elif RETRO_PLATFORM == RETRO_LINUX
+     if (!usingCWD)
+        sprintf(buffer, "%s/UData.bin", SDL_GetPrefPath("Sonic 1_2", PREF_PATH));
+    else
+        sprintf(buffer, "%s/UData.bin", gamePath);
 #else
     sprintf(buffer, "%sUData.bin", gamePath);
 #endif
